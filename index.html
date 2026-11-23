@@ -13,7 +13,7 @@
 @font-face{font-family:"Inter";src:url(fonts/Inter-Regular.otf);font-weight:400}
 @font-face{font-family:"Inter";src:url(fonts/Inter-Medium.otf);font-weight:500}
 @font-face{font-family:"Inter";src:url(fonts/Inter-SemiBold.otf);font-weight:600}
-*{box-sizing:border-box}body{margin:0;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}*{box-sizing:border-box}body{margin:0;-webkit-tap-highlight-color:transparent}
 </style><style>
 /* Layout: one calm column — today first, then a month-by-month dot grid, then the full list per month */
 :root{
@@ -74,6 +74,8 @@ summary .c{font-family:var(--sans);font-size:13px;color:var(--muted);font-varian
 .install{background:var(--blush);border-radius:14px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;font-size:15px}
 .install ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
 .install p{margin:0;color:var(--muted);font-size:14px}
+.install button.ghost{background:transparent;color:var(--accent-strong);box-shadow:inset 0 0 0 1.5px var(--accent-strong)}
+.install .one{margin:0;color:var(--ink);font-size:15px}
 .install button{align-self:flex-start;font-family:var(--sans);font-weight:600;font-size:14px;color:#fff;background:var(--accent-strong);border:0;border-radius:8px;padding:10px 16px;min-height:44px}
 .wrap{padding-top:max(28px,env(safe-area-inset-top,0px));padding-bottom:max(64px,env(safe-area-inset-bottom,0px))}
 @media (prefers-reduced-motion: reduce){.bar i{transition:none}}
@@ -95,6 +97,7 @@ summary .c{font-family:var(--sans);font-size:13px;color:var(--muted);font-varian
     <ol id="instSteps"></ol>
     <button type="button" id="instBtn" hidden>Installeren</button>
     <p id="instNote"></p>
+    <button type="button" id="instHide" class="ghost">Laat deze melding niet meer zien</button>
   </section>
   <section class="stats" aria-live="polite">
     <div><b id="sDone">0</b>van <span id="sTotal"></span> gelezen</div>
@@ -246,7 +249,8 @@ const IOS=/iPhone|iPad|iPod/.test(UA)||(navigator.platform==="MacIntel"&&navigat
     msg.textContent=keys.length+(keys.length===1?" vinkje":" vinkjes")+" teruggezet.";
   });
   const standalone=window.navigator.standalone===true||matchMedia("(display-mode: standalone)").matches;
-  if(!standalone){
+  let hidden=false;try{hidden=localStorage.getItem("leesrooster-hide-install")==="1";}catch(e){}
+  if(!standalone&&!hidden){
     const android=/Android/.test(UA);
     const b=(s)=>"<b>"+s+"</b>",en=(s)=>" (<i>"+s+"</i>)";
     let title="Op je beginscherm zetten",steps,note="Open Leesrooster daarna via het icoon op je beginscherm. Dan werkt hij als een app, ook zonder internet. Vinkjes die je hier in de browser zet, staan los van die in de app.";
@@ -268,7 +272,10 @@ const IOS=/iPhone|iPad|iPod/.test(UA)||(navigator.platform==="MacIntel"&&navigat
       else {steps=["Zet deze pagina bij je bladwijzers, of open hem in Chrome of Edge om hem als app te installeren."];note="";}
     }
     document.getElementById("instTitle").textContent=title;
-    document.getElementById("instSteps").innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
+    const ol=document.getElementById("instSteps");
+    if(steps.length===1){const p=document.createElement("p");p.className="one";p.innerHTML=steps[0];ol.replaceWith(p);}
+    else ol.innerHTML=steps.map(s=>"<li>"+s+"</li>").join("");
+    document.getElementById("instHide").addEventListener("click",()=>{try{localStorage.setItem("leesrooster-hide-install","1");}catch(e){}document.getElementById("install").hidden=true;});
     document.getElementById("instNote").textContent=note;document.getElementById("instNote").hidden=!note;
     document.getElementById("install").hidden=false;
     let deferred=null;const ib=document.getElementById("instBtn");

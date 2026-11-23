@@ -1,4 +1,4 @@
-const CACHE = "leesrooster-v2";
+const CACHE = "leesrooster-v3";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png",
   "fonts/Lora-Variable.ttf", "fonts/Lora-Italic-Variable.ttf", "fonts/Inter-Regular.otf", "fonts/Inter-Medium.otf", "fonts/Inter-SemiBold.otf"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
