@@ -76,6 +76,7 @@ summary .c{font-family:var(--sans);font-size:13px;color:var(--muted);font-varian
 .install p{margin:0;color:var(--muted);font-size:14px}
 .install button.ghost{background:transparent;color:var(--accent-strong);box-shadow:inset 0 0 0 1.5px var(--accent-strong)}
 .install .one{margin:0;color:var(--ink);font-size:15px}
+.install .one+.one{margin-top:2px}
 .install button{align-self:flex-start;font-family:var(--sans);font-weight:600;font-size:14px;color:#fff;background:var(--accent-strong);border:0;border-radius:8px;padding:10px 16px;min-height:44px}
 .wrap{padding-top:max(28px,env(safe-area-inset-top,0px));padding-bottom:max(64px,env(safe-area-inset-bottom,0px))}
 @media (prefers-reduced-motion: reduce){.bar i{transition:none}}
@@ -98,6 +99,13 @@ summary .c{font-family:var(--sans);font-size:13px;color:var(--muted);font-varian
     <button type="button" id="instBtn" hidden>Installeren</button>
     <p id="instNote"></p>
     <button type="button" id="instHide" class="ghost">Laat deze melding niet meer zien</button>
+  </section>
+  <section class="install" id="bkInfo" hidden>
+    <div class="lab">Je vinkjes bewaren</div>
+    <p class="one">Je vinkjes worden alleen op dit apparaat bewaard. Er gaat niets naar internet. Verwijder je de app of wis je je browsergegevens, dan zijn ze weg.</p>
+    <p class="one" id="bkInfoSave"></p>
+    <p class="one">Nieuw apparaat, of de app opnieuw geïnstalleerd? Tik onderaan bij <b>Back-up</b> twee keer op <b>Terugzetten</b> en kies je back-upbestand.</p>
+    <button type="button" id="bkInfoHide" class="ghost">Begrepen</button>
   </section>
   <section class="stats" aria-live="polite">
     <div><b id="sDone">0</b>van <span id="sTotal"></span> gelezen</div>
@@ -283,6 +291,15 @@ const IOS=/iPhone|iPad|iPod/.test(UA)||(navigator.platform==="MacIntel"&&navigat
     ib.addEventListener("click",async()=>{if(!deferred)return;deferred.prompt();try{await deferred.userChoice;}catch(e){}deferred=null;ib.hidden=true;});
     window.addEventListener("appinstalled",()=>{document.getElementById("install").hidden=true;});
   }
+  (function(){
+    let seen=false;try{seen=localStorage.getItem("leesrooster-hide-backupinfo")==="1";}catch(e){}
+    if(seen)return;
+    document.getElementById("bkInfoSave").innerHTML=IOS
+      ?"Maak daarom af en toe een back-up: tik onderaan bij <b>Back-up</b> op <b>Back-up bewaren</b> en kies <b>Bewaar in Bestanden</b> (<i>Save to Files</i>) → <b>iCloud Drive</b>."
+      :"Maak daarom af en toe een back-up: tik onderaan bij <b>Back-up</b> op <b>Back-up bewaren</b>. Het bestand komt in je map <b>Downloads</b>.";
+    const box=document.getElementById("bkInfo");box.hidden=false;
+    document.getElementById("bkInfoHide").addEventListener("click",()=>{try{localStorage.setItem("leesrooster-hide-backupinfo","1");}catch(e){}box.hidden=true;});
+  })();
   if("serviceWorker" in navigator&&location.protocol==="https:"){navigator.serviceWorker.register("sw.js").catch(()=>{});}
 })();
 </script>
